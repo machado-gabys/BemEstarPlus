@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    Tendências Emocionais - {{ block.super }}
+{% endblock title %}
+
+{% block body %}
+<div class="container">
+    {% if user.is_superuser %}
+        <br />
+        <h5><b>Tendências Emocionais Semanais</b></h5>
+        <div class="row">
+            <div class="col-md-12">
+                <br />
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nome</th>
+                            <th scope="col">Sobrenome</th>
+                            <th scope="col">E-mail</th>
+                            <th scope="col">Estado Emocional Mais Frequente</th>
+                            <th scope="col">Frequência</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in user_emotional_trends %}
+                            <tr>
+                                <th scope="row">{{ item.user.id }}</th>
+                                <td>{{ item.user.first_name }}</td>
+                                <td>{{ item.user.last_name }}</td>
+                                <td>{{ item.user.email }}</td>
+                                <td>{{ item.most_frequent_state|capfirst }}</td>
+                                <td>{{ item.frequency }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <h5><b>Resumo das Tendências Emocionais</b></h5>
+                <canvas id="emotionalTrendsChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            const ctx = document.getElementById('emotionalTrendsChart').getContext('2d');
+            const data = {
+                labels: ['Animado', 'Calmo', 'Frustrado', 'Confuso', 'Cansado'],
+                datasets: [{
+                    label: 'Tendências Emocionais',
+                    data: [
+                        {{ overall_trends.animado|default:"0" }},
+                        {{ overall_trends.calmo|default:"0" }},
+                        {{ overall_trends.frustrado|default:"0" }},
+                        {{ overall_trends.confuso|default:"0" }},
+                        {{ overall_trends.cansado|default:"0" }}
+                    ],
+                    backgroundColor: [
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(153, 102, 255, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(153, 102, 255, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const config = {
+                type: 'bar',
+                data: data,
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+
+            const emotionalTrendsChart = new Chart(ctx, config);
+        </script>
+    {% else %}
+        <br />
+        <h5><b>Você não tem permissão para acessar este relatório.</b></h5>
+    {% endif %}
+</div>
+{% endblock body %}
